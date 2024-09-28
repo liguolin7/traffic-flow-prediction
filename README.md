@@ -66,3 +66,24 @@ To set up the project locally, follow these steps:
 
      streamlit run src/streamlit_app.py
 
+# Model Training
+The model uses an LSTM architecture to predict traffic flow. The training process involves:
+
+1. Splitting the data into training and testing sets.
+2. Fitting the model on the training data and evaluating it on the test data.
+3. Calculating Mean Absolute Error (MAE) and Root Mean Squared Error (RMSE) as evaluation metrics.
+   
+# Streamlit App
+
+The Streamlit app allows users to input traffic volume, temperature, and precipitation, and receive real-time predictions of future traffic flow. This interactive interface enhances usability for traffic planners and researchers.
+
+# Future Enhancements
+
+1. Incorporate real-time traffic data from sensors or APIs for live predictions.
+2. Extend the model to include more features like public transportation data, special events, and road construction.
+3. Develop visualizations for historical traffic trends using libraries like Matplotlib or Seaborn.
+4. Implement more complex models such as GRU or CNN for time series forecasting.
+   
+# License
+
+This project is licensed under the MIT License. See the LICENSE file for more details.
