@@ -4,15 +4,17 @@ from keras.models import Sequential
 from keras.layers import LSTM, Dense, Dropout
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.preprocessing import MinMaxScaler  
 import joblib
+
 
 def create_dataset(data, time_step=1):
     """Create dataset with time steps."""
     X, y = [], []
     for i in range(len(data) - time_step - 1):
-        X.append(data[i:(i + time_step), :-1])
-        y.append(data[i + time_step, -1])
-    return np.array(X), np.array(y)
+        X.append(data[i:(i + time_step), :-1])  # all columns except the last
+        y.append(data[i + time_step, -1])  # only the last column
+    return np.array(X, dtype=np.float32), np.array(y, dtype=np.float32)
 
 def build_model(input_shape):
     """Build and compile LSTM model."""
@@ -27,9 +29,26 @@ def build_model(input_shape):
 
 if __name__ == '__main__':
     # Load processed data
-    data = pd.read_csv('data/processed_data.csv').values
-    X, y = create_dataset(data)
-    
+    data = pd.read_csv('data/processed_data.csv')
+
+    # Print the first few rows and the column types
+    print(data.head())
+    print(data.dtypes)
+
+    # Drop non-numeric columns
+    non_numeric_columns = ['timestamp', 'region_name', 'Station.City', 
+                           'Station.Code', 'Station.Location', 
+                           'Station.State', 'region_ons_code', 'Date.Month', 
+                           'Date.Week of', 'Date.Year']  # Add any additional non-numeric columns as needed
+    data = data.drop(columns=non_numeric_columns, errors='ignore')  # drop non-numeric columns
+
+    # Initialize and fit the scaler
+    scaler = MinMaxScaler()  # Create a scaler object
+    data_scaled = scaler.fit_transform(data)  # Fit and transform the data
+
+    # Create the dataset for LSTM
+    X, y = create_dataset(data_scaled)
+
     # Train/test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -42,8 +61,10 @@ if __name__ == '__main__':
     
     # Evaluate the model
     predictions = model.predict(X_test)
-    print("Mean Absolute Error:", mean_absolute_error(y_test, predictions))
-    print("Root Mean Squared Error:", mean_squared_error(y_test, predictions, squared=False))
+    mae = mean_absolute_error(y_test, predictions)
+    rmse = np.sqrt(mean_squared_error(y_test, predictions))
+    print("Mean Absolute Error:", mae)
+    print("Root Mean Squared Error:", rmse)
 
     # Save the scaler
-    joblib.dump(scaler, 'models/scaler.pkl')
+    joblib.dump(scaler, 'models/scaler.pkl')  # Save the fitted scaler

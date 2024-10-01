@@ -4,22 +4,36 @@ from datetime import datetime
 
 def load_data(traffic_file, weather_file):
     """Load traffic and weather data from CSV files."""
-    traffic_data = pd.read_csv(traffic_file, parse_dates=['timestamp'])
-    weather_data = pd.read_csv(weather_file, parse_dates=['timestamp'])
+    # Load traffic and weather data without parsing 'timestamp' since it doesn't exist
+    traffic_data = pd.read_csv(traffic_file)
+    
+    # Parse dates from the "Date.Full" column in weather data
+    weather_data = pd.read_csv(weather_file, parse_dates=['Date.Full'])
+    
     return traffic_data, weather_data
 
 def preprocess_data(traffic_data, weather_data):
     """Preprocess the traffic and weather data."""
-    # Merge datasets on timestamp
+    # Rename the 'Date.Full' column in weather data to 'timestamp' for easier merging
+    weather_data.rename(columns={'Date.Full': 'timestamp'}, inplace=True)
+    
+    # Create a synthetic timestamp column in traffic_data
+    # (You may need to adjust this part based on how traffic and weather data are related)
+    traffic_data['timestamp'] = weather_data['timestamp']
+
+    # Merge datasets on 'timestamp'
     data = pd.merge(traffic_data, weather_data, on='timestamp', how='inner')
     
     # Fill missing values
-    data.fillna(method='ffill', inplace=True)
+    data.ffill(inplace=True)
 
     # Normalize features
     scaler = MinMaxScaler()
-    data[['traffic_volume', 'temperature', 'precipitation']] = scaler.fit_transform(
-        data[['traffic_volume', 'temperature', 'precipitation']]
+
+    # Use the correct column names based on the CSV files
+    # For example, 'all_motor_vehicles' could represent traffic volume
+    data[['all_motor_vehicles', 'Data.Temperature.Avg Temp', 'Data.Precipitation']] = scaler.fit_transform(
+        data[['all_motor_vehicles', 'Data.Temperature.Avg Temp', 'Data.Precipitation']]
     )
     
     return data, scaler
