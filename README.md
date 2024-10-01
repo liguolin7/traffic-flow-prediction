@@ -40,7 +40,7 @@ To set up the project locally, follow these steps:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/traffic-flow-prediction.git
+   git clone https://github.com/karimosman89/traffic-flow-prediction.git
    cd traffic-flow-prediction
 2. **Create a virtual environment:**
 
