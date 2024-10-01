@@ -7,13 +7,12 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import MinMaxScaler  
 import joblib
 
-
 def create_dataset(data, time_step=1):
     """Create dataset with time steps."""
     X, y = [], []
     for i in range(len(data) - time_step - 1):
         X.append(data[i:(i + time_step), :-1])  # all columns except the last
-        y.append(data[i + time_step, -1])  # only the last column
+        y.append(data[i + time_step, -1])  # only the last column (target)
     return np.array(X, dtype=np.float32), np.array(y, dtype=np.float32)
 
 def build_model(input_shape):
@@ -31,16 +30,12 @@ if __name__ == '__main__':
     # Load processed data
     data = pd.read_csv('data/processed_data.csv')
 
-    # Print the first few rows and the column types
-    print(data.head())
-    print(data.dtypes)
-
     # Drop non-numeric columns
     non_numeric_columns = ['timestamp', 'region_name', 'Station.City', 
                            'Station.Code', 'Station.Location', 
-                           'Station.State', 'region_ons_code', 'Date.Month', 
-                           'Date.Week of', 'Date.Year']  # Add any additional non-numeric columns as needed
-    data = data.drop(columns=non_numeric_columns, errors='ignore')  # drop non-numeric columns
+                           'Station.State', 'region_ons_code', 
+                           'Date.Month', 'Date.Week of', 'Date.Year','Data.Precipitation']
+    data = data.drop(columns=non_numeric_columns, errors='ignore')  # Drop non-numeric columns
 
     # Initialize and fit the scaler
     scaler = MinMaxScaler()  # Create a scaler object
@@ -53,7 +48,7 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Build and train the model
-    model = build_model((X_train.shape[1], X_train.shape[2]))
+    model = build_model((X_train.shape[0], X_train.shape[2]))
     model.fit(X_train, y_train, epochs=100, batch_size=32)
 
     # Save the model

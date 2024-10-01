@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
 from keras.models import load_model
 import joblib
@@ -28,11 +27,11 @@ precipitation = st.number_input("Precipitation (mm):", min_value=0.0)
 
 if st.button("Predict"):
     try:
-        # Prepare input data
-        new_data = np.array([[traffic_volume, temperature, precipitation]])
+        # Prepare input data with additional features as zeros (adjust as needed)
+        new_data = np.array([[traffic_volume, temperature, precipitation] + [0] * 14])  # Adjust for additional features
         
         # Scale input data and reshape for prediction
-        new_data_scaled = scaler.transform(new_data).reshape(1, new_data.shape[1])
+        new_data_scaled = scaler.transform(new_data).reshape(1, 1, -1)  # Reshape for LSTM
         
         # Make prediction
         prediction = model.predict(new_data_scaled)
